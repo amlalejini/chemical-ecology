@@ -234,4 +234,16 @@ RecordedCommunitySummary KeepPresentWithInteractionPath(
   return summarizer.Summarize(new_counts, false);
 }
 
+RecordedCommunitySummary KeepPresent(
+  const RecordedCommunitySummarizer& summarizer,
+  const RecordedCommunitySummary& in_summary
+) {
+  // Create new counts vector from given counts. Zero out all present no interaction species.
+  emp::vector<double> new_counts(in_summary.counts);
+  for (size_t species_i = 0; species_i < new_counts.size(); ++species_i) {
+    new_counts[species_i] = (in_summary.present[species_i]) ? 1 : 0;
+  }
+  return summarizer.Summarize(new_counts, false);
+}
+
 } // End chemical_ecology namespace
