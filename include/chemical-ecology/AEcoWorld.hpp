@@ -178,12 +178,12 @@ protected:
         double assembly_prop = (assembly_id) ?
           cur_assembly_communities->GetSmoothedCommunityProportion(assembly_id.value()) :
           0.0;
-        if (assembly_prop == 0) 
+        if (assembly_prop == 0)
           assembly_prop = 1/((double)emp::Sum(cur_assembly_communities->GetCommunityCounts())+cur_assembly_communities->GetCommunityCounts().size());
         double adaptive_prop = (adaptive_id) ?
           cur_adaptive_communities->GetSmoothedCommunityProportion(adaptive_id.value()) :
           0.0;
-        if (adaptive_prop == 0) 
+        if (adaptive_prop == 0)
           adaptive_prop = 1/((double)emp::Sum(cur_adaptive_communities->GetCommunityCounts())+cur_adaptive_communities->GetCommunityCounts().size());
         return (assembly_prop != 0) ?
           emp::to_string(adaptive_prop / assembly_prop) :
@@ -192,7 +192,7 @@ protected:
       "smooth_adaptive_assembly_ratio"
     );
 
-    // Which species dominate 
+    // Which species dominate
     summary_file.AddFun<std::string>(
       [this]() -> std::string {
         const auto& summary = cur_world_communities->GetCommunitySummary(community_id);
@@ -225,7 +225,7 @@ public:
 
     // Update summary file for every recorded world community
     for (community_id = 0; community_id < world_communities.GetSize(); ++community_id) {
-      
+
       summary_file.Update();
     }
 
@@ -352,7 +352,7 @@ private:
   void SnapshotConfig();
 
   // Output a snapshot of the community structure identified from interaction matrix
-  void SnapshotSubCommunities(); 
+  void SnapshotSubCommunities();
 
   // Output a snapshot of the community structure
   template<typename SUMMARY_SET_KEY_T>
@@ -839,7 +839,7 @@ public:
   // This function should be called to create a ranked copy of the world
   world_t GenRankedWorld(const world_t& custom_world, bool threshold) {
     world_t eval_world;
-    // To handle cases where sparse matricies disrput rankings with many 
+    // To handle cases where sparse matricies disrput rankings with many
     // low magnitude species, we can round down species less than a threshold value
     if(threshold){
       world_t threshold_world(
@@ -1154,7 +1154,7 @@ void AEcoWorld::SetupCommunitySummarizers() {
     }
   );
 
-  // Reports rankings 
+  // Reports rankings
   community_summarizer_ranked = emp::NewPtr<RecordedCommunitySummarizer>(
     community_structure,
     [](double count) -> bool { return true; }
@@ -1210,13 +1210,11 @@ void AEcoWorld::AnalyzeWorldCommunities(
 
     // Set of recorded communities with "raw" counts
     RecordedCommunitySet<emp::vector<double>> recorded_communities_world_raw(recorded_comm_key_fun);
-    // RecordedCommunitySet<emp::vector<double>> recorded_communities_assembly_raw(recorded_comm_key_fun);
-    // RecordedCommunitySet<emp::vector<double>> recorded_communities_adaptive_raw(recorded_comm_key_fun);
 
     // Set of recorded communities with counts that have had PNI-species zeroed-out
     RecordedCommunitySet<emp::vector<double>> recorded_communities_world_pwip(recorded_comm_key_fun);
-    // RecordedCommunitySet<emp::vector<double>> recorded_communities_assembly_pwip(recorded_comm_key_fun);
-    // RecordedCommunitySet<emp::vector<double>> recorded_communities_adaptive_pwip(recorded_comm_key_fun);
+
+    // TODO - add PWIP + PA recorded community set
 
     // Set of species ranked by dominance
     RecordedCommunitySet<emp::vector<double>> recorded_communities_ranked(recorded_comm_key_fun);
@@ -1271,28 +1269,14 @@ void AEcoWorld::AnalyzeWorldCommunities(
       );
 
       SnapshotCommunitySetScores</*SUMMARY_SET_KEY_T=*/emp::vector<double>>(
-        output_dir + "recorded_communities_scores_pwip.csv",
-        {recorded_communities_world_pwip, "world", true, config->UPDATES()},
-        {*recorded_communities_assembly_pwip, "assembly", true, config->UPDATES()},
-        {*recorded_communities_adaptive_pwip, "adaptive", true, config->UPDATES()}
-      );
-
-      SnapshotCommunitySetScores</*SUMMARY_SET_KEY_T=*/emp::vector<double>>(
-        output_dir + "recorded_communities_scores_raw.csv",
-        {recorded_communities_world_raw, "world", true, config->UPDATES()},
-        {*recorded_communities_assembly_raw, "assembly", true, config->UPDATES()},
-        {*recorded_communities_adaptive_raw, "adaptive", true, config->UPDATES()}
-      );
-
-      SnapshotCommunitySetScores</*SUMMARY_SET_KEY_T=*/emp::vector<double>>(
-        output_dir + "ranked_communities_scores.csv",
+        output_dir + "ranked_communities_scores_" + emp::to_string(world_update) + ".csv",
         {recorded_communities_ranked, "world", true, config->UPDATES()},
         {*recorded_communities_assembly_ranked, "assembly", true, config->UPDATES()},
         {*recorded_communities_adaptive_ranked, "adaptive", true, config->UPDATES()}
       );
 
       SnapshotCommunitySetScores</*SUMMARY_SET_KEY_T=*/emp::vector<double>>(
-        output_dir + "ranked_threshold_communities_scores.csv",
+        output_dir + "ranked_threshold_communities_scores_" + emp::to_string(world_update) + ".csv",
         {recorded_communities_ranked_threshold, "world", true, config->UPDATES()},
         {*recorded_communities_assembly_ranked_threshold, "assembly", true, config->UPDATES()},
         {*recorded_communities_adaptive_ranked_threshold, "adaptive", true, config->UPDATES()}
@@ -1694,12 +1678,12 @@ void AEcoWorld::SnapshotCommunitySetScores(
       double assembly_prop = (assembly_id) ?
         assembly_community_set.summary_set.GetSmoothedCommunityProportion(assembly_id.value()) :
         0.0;
-      if (assembly_prop == 0) 
+      if (assembly_prop == 0)
         assembly_prop = 1/((double)emp::Sum(assembly_community_set.summary_set.GetCommunityCounts())+assembly_community_set.summary_set.GetCommunityCounts().size());
       double adaptive_prop = (adaptive_id) ?
         adaptive_community_set.summary_set.GetSmoothedCommunityProportion(adaptive_id.value()) :
         0.0;
-      if (adaptive_prop == 0) 
+      if (adaptive_prop == 0)
         adaptive_prop = 1/((double)emp::Sum(adaptive_community_set.summary_set.GetCommunityCounts())+adaptive_community_set.summary_set.GetCommunityCounts().size());
       return (assembly_prop != 0) ?
         emp::to_string(adaptive_prop / assembly_prop) :
@@ -1719,12 +1703,12 @@ void AEcoWorld::SnapshotCommunitySetScores(
         double assembly_prop = (assembly_id) ?
           assembly_community_set.summary_set.GetSmoothedCommunityProportion(assembly_id.value()) :
           0.0;
-        if (assembly_prop == 0) 
+        if (assembly_prop == 0)
           assembly_prop = 1/((double)emp::Sum(assembly_community_set.summary_set.GetCommunityCounts())+assembly_community_set.summary_set.GetCommunityCounts().size());
         double adaptive_prop = (adaptive_id) ?
           adaptive_community_set.summary_set.GetSmoothedCommunityProportion(adaptive_id.value()) :
           0.0;
-        if (adaptive_prop == 0) 
+        if (adaptive_prop == 0)
           adaptive_prop = 1/((double)emp::Sum(adaptive_community_set.summary_set.GetCommunityCounts())+adaptive_community_set.summary_set.GetCommunityCounts().size());
         const double ratio = adaptive_prop / assembly_prop;
         community_scores.push_back(world_prop*ratio);
@@ -1749,12 +1733,12 @@ void AEcoWorld::SnapshotCommunitySetScores(
         double assembly_prop = (assembly_id) ?
           assembly_community_set.summary_set.GetSmoothedCommunityProportion(assembly_id.value()) :
           0.0;
-        if (assembly_prop == 0) 
+        if (assembly_prop == 0)
           assembly_prop = 1/((double)emp::Sum(assembly_community_set.summary_set.GetCommunityCounts())+assembly_community_set.summary_set.GetCommunityCounts().size());
         double adaptive_prop = (adaptive_id) ?
           adaptive_community_set.summary_set.GetSmoothedCommunityProportion(adaptive_id.value()) :
           0.0;
-        if (adaptive_prop == 0) 
+        if (adaptive_prop == 0)
           adaptive_prop = 1/((double)emp::Sum(adaptive_community_set.summary_set.GetCommunityCounts())+adaptive_community_set.summary_set.GetCommunityCounts().size());
         const double ratio = adaptive_prop / assembly_prop;
         community_scores.push_back(std::log(world_prop*ratio));
